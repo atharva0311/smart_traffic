@@ -41,6 +41,11 @@ INSTALLED_APPS = [
     'traffic',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+'https://smart-traffic.onrender.com'
+]
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
