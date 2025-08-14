@@ -1,0 +1,40 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Django database
+db.sqlite3
+
+# Django static & media files
+/staticfiles/
+/media/
+
+# Local environment variables
+.env
+*.env
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test / coverage reports
+htmlcov/
+.tox/
+.coverage
+coverage.xml

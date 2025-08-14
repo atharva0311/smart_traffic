@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Traffic Control Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:600,700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #19376d;
+      --accent: #38b6ff;
+      --white: #fff;
+      --gradient: linear-gradient(120deg, rgba(25,55,109,0.9), rgba(56,182,255,0.9));
+    }
+    body {
+      background: #f5faff;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    /* Navbar */
+    nav.navbar {
+    background: var(--white);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    padding-top: 1rem;   /* Increased vertical space */
+    padding-bottom: 1rem;
+    }
+        .navbar-brand {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.5rem;   /* Larger brand text */
+    }
+        .navbar .nav-link {
+    font-weight: 500;
+    font-size: 1.1rem;   /* Bigger menu text */
+    padding: 0.6rem 1rem; /* More clickable area */
+    position: relative;
+    }
+    .navbar .nav-link::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0%;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .navbar .nav-link:hover::after,
+    .navbar .nav-link.active::after {
+      width: 50%;
+    }
+    /* Hero Section */
+    header {
+      background: var(--gradient),
+        url('https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+      color: var(--white);
+      padding: 6rem 1rem;
+      text-align: center;
+      border-radius: 0 0 40px 40px;
+      position: relative;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 0 0 40px 40px;
+    }
+    header h1, header p {
+      position: relative;
+      z-index: 1;
+    }
+    header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    header p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    /* Feature Cards */
+    .feature-card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      backdrop-filter: blur(8px);
+      padding: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(56,182,255,0.3);
+    }
+    .feature-card i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--white);
+      background: var(--accent);
+      padding: 15px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    /* Buttons */
+    .btn-theme {
+      background: var(--accent);
+      color: var(--white);
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 0.7rem 1.8rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-theme:hover {
+      background: var(--primary);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(56,182,255,0.6);
+    }
+    /* Footer */
+/* Footer */
+    footer {
+      background: var(--gradient);
+      color: var(--white);
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+    footer hr {
+      opacity: 0.2;
+    }
+    .footer-links a {
+      color: #bbdefb;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: #ffffff;
+    }
+
+    /* Footer layout adjustments */
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 30px;
+      margin: 0;
+    }
+
+    .footer-row > [class*="col-"] {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 0;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* EXTRA space after description column */
+    .footer-row > .col-md-4:first-child {
+      margin-right: 50px; /* added spacing */
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 991px) {
+      .footer-row {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      .footer-row > [class*="col-"] {
+        align-items: center;
+        margin-right: 0; /* reset margin for mobile */
+      }
+    }
+
+    .footer-links li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  {% load static %}
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg px-4">
+    <a class="navbar-brand fw-bold" href="#"><i class="fas fa-traffic-light me-2"></i>Traffic System</a>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'live' %}">Live Control</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+    </ul>
+  </nav>
+  
+  <!-- Hero -->
+  <header>
+    <h1>Smart Automated Traffic Control System</h1>
+    <p>Real-time AI-powered traffic monitoring with adaptive signals and in-depth analytics for safer, smoother roads.</p>
+  </header>
+  
+  <!-- Content -->
+  <div class="container py-5">
+    <div class="row align-items-center mb-5">
+      <div class="col-lg-6">
+        <h2 class="fw-bold mb-3" style="color:var(--primary)">Welcome to Smart Traffic Control</h2>
+        <p class="lead">AI-powered adaptive signals for smarter, safer city traffic. YOLO detects vehicles, analytics guide lane optimization, and green lights adjust automatically.</p>
+        <a href="{% url 'live' %}" class="btn btn-theme mt-3">Go to Live Control Panel</a>
+      </div>
+      <div class="col-lg-6 text-center">
+        <img src="{% static 'car.jpg' %}" class="main-img" alt="Traffic Dashboard">
+      </div>
+    </div>
+    
+    <!-- Features -->
+    <div class="row justify-content-center text-center">
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <i class="fa-solid fa-car-side"></i>
+          <h5>Live AI Detection</h5>
+          <p>Instantly detect cars, buses, and trucks with ultra-fast YOLO neural networks.</p>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="feature-card">
+          <i class="fa-solid fa-traffic-light"></i>
+          <h5>Adaptive Green Lights</h5>
+          <p>Dynamic signal timings that adapt to real-time traffic conditions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-row">
+      <!-- Description -->
+      <div class="col-md-4">
+        <h5 class="mb-1"><i class="fas fa-traffic-light me-2"></i>Smart Traffic Control</h5>
+        <p class="small mb-0">
+          AI-powered traffic monitoring and adaptive signal control for smarter, safer roads.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4">
+        <h6 class="fw-bold mb-1">Quick Links</h6>
+        <ul class="list-unstyled small mb-0 footer-links">
+          <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'live' %}">Live Control</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </div>
+
+      <!-- Follow Us -->
+      <div class="col-md-4">
+        <h6 class="fw-bold mb-1">Follow Us</h6>
+        <p class="small mb-0">Stay connected for updates and features.</p>
+      </div>
+    </div>
+    <hr class="border-light my-3">
+    <div class="text-center small">
+      &copy; 2025 Smart Traffic Control | All Rights Reserved
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

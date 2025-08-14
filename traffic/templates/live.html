@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Automated Traffic Control System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Google Fonts, Bootstrap, Font Awesome -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:500,600,700&display=swap">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+:root {
+  --primary: #19376d;
+  --accent: #38b6ff;
+  --white: #fff;
+  --bg: #f5faff;
+  --gradient: linear-gradient(to right, #0d47a1, #42a5f5);
+}
+
+/* Body */
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: #333;
+}
+
+/* Navbar */
+nav.navbar {
+  background: var(--white);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.navbar-brand {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+.navbar .nav-link {
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 0.6rem 1rem;
+  position: relative;
+}
+.navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+.navbar .nav-link:hover::after,
+.navbar .nav-link.active::after {
+  width: 50%;
+}
+
+/* Lane Cards */
+.camera-card {
+  border-radius: 15px;
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.camera-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.lane-header {
+  background: var(--gradient);
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+video {
+  height: 250px;
+  width: 100%;
+  object-fit: cover;
+  background: #ccc;
+}
+.signal-light {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 8px;
+}
+.signal-red { background-color: red; }
+.signal-green { background-color: green; }
+.countdown {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* Logs */
+#logs {
+  height: 180px;
+  overflow-y: auto;
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 0.9em;
+}
+.log-entry {
+  border-bottom: 1px solid #eee;
+  padding: 5px 0;
+}
+
+/* Footer */
+    footer {
+      background: var(--gradient);
+      color: var(--white);
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+    footer hr {
+      opacity: 0.2;
+    }
+    .footer-links a {
+      color: #bbdefb;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: #ffffff;
+    }
+
+    /* Footer layout adjustments */
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 30px;
+      margin: 0;
+    }
+
+    .footer-row > [class*="col-"] {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 0;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* EXTRA space after description column */
+    .footer-row > .col-md-4:first-child {
+      margin-right: 50px; /* added spacing */
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 991px) {
+      .footer-row {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      .footer-row > [class*="col-"] {
+        align-items: center;
+        margin-right: 0; /* reset margin for mobile */
+      }
+    }
+
+    .footer-links li {
+      margin-bottom: 5px;
+    }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg px-4">
+  <a class="navbar-brand" href="#"><i class="fas fa-traffic-light me-2"></i>Traffic System</a>
+  <ul class="navbar-nav ms-auto">
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link active" href="{% url 'live' %}">Live Control</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+  </ul>
+</nav>
+
+<!-- Main -->
+<main class="container my-5">
+  <h1 class="text-center fw-bold mb-5">Smart Automated Traffic Control System</h1>
+  <div class="row g-4">
+    <!-- Four Lanes -->
+    <div class="col-md-6">
+      <div class="camera-card">
+        <div class="lane-header">North Lane</div>
+        <video id="north-feed" autoplay muted></video>
+        <div class="p-3 text-center">
+          <p>Vehicles Detected: <span id="north-count">0</span></p>
+          <p>Signal: <span id="north-signal-light" class="signal-light signal-red"></span></p>
+          <p>Time Left: <span id="north-time">0</span> sec</p>
+          <p>Waiting Time: <span id="north-wait">0</span> sec</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="camera-card">
+        <div class="lane-header">East Lane</div>
+        <video id="east-feed" autoplay muted></video>
+        <div class="p-3 text-center">
+          <p>Vehicles Detected: <span id="east-count">0</span></p>
+          <p>Signal: <span id="east-signal-light" class="signal-light signal-red"></span></p>
+          <p>Time Left: <span id="east-time">0</span> sec</p>
+          <p>Waiting Time: <span id="east-wait">0</span> sec</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="camera-card">
+        <div class="lane-header">South Lane</div>
+        <video id="south-feed" autoplay muted></video>
+        <div class="p-3 text-center">
+          <p>Vehicles Detected: <span id="south-count">0</span></p>
+          <p>Signal: <span id="south-signal-light" class="signal-light signal-red"></span></p>
+          <p>Time Left: <span id="south-time">0</span> sec</p>
+          <p>Waiting Time: <span id="south-wait">0</span> sec</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="camera-card">
+        <div class="lane-header">West Lane</div>
+        <video id="west-feed" autoplay muted></video>
+        <div class="p-3 text-center">
+          <p>Vehicles Detected: <span id="west-count">0</span></p>
+          <p>Signal: <span id="west-signal-light" class="signal-light signal-red"></span></p>
+          <p>Time Left: <span id="west-time">0</span> sec</p>
+          <p>Waiting Time: <span id="west-wait">0</span> sec</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs -->
+  <div class="mt-5">
+    <h4 class="fw-bold mb-3">System Logs</h4>
+    <div id="logs"></div>
+  </div>
+</main>
+
+<!-- Script (unchanged) -->
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === "videoinput");
+
+    const lanes = [
+        { id: "north-feed", name: "North" },
+        { id: "east-feed", name: "East" },
+        { id: "south-feed", name: "South" },
+        { id: "west-feed", name: "West" }
+    ];
+
+    let currentLaneIndex = 0;
+    let timeLeft = 0;
+    let timerInterval = null;
+    const logDiv = document.getElementById("logs");
+
+    let waitingTimes = { North: 0, East: 0, South: 0, West: 0 };
+
+    for (let i = 0; i < lanes.length; i++) {
+        const videoElement = document.getElementById(lanes[i].id);
+        if (videoDevices[i]) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: videoDevices[i].deviceId } }, audio: false
+                });
+                videoElement.srcObject = stream;
+                await videoElement.play();
+            } catch (error) {
+                console.error("Camera error:", error);
+            }
+        }
+    }
+
+    function getCSRFToken() {
+        let cookieValue = null;
+        document.cookie.split(";").forEach(c => {
+            c = c.trim();
+            if (c.startsWith("csrftoken=")) cookieValue = c.substring(10);
+        });
+        return cookieValue;
+    }
+
+    function captureFrameAsBase64(videoId, callback) {
+        const video = document.getElementById(videoId);
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+            const reader = new FileReader();
+            reader.onloadend = () => callback(reader.result);
+            reader.readAsDataURL(blob);
+        }, "image/jpeg");
+    }
+
+    function appendLog(message) {
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
+        logEntry.textContent = message;
+        logDiv.appendChild(logEntry);
+        if (logDiv.childElementCount > 50) logDiv.removeChild(logDiv.firstChild);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function sendFrame(lane) {
+        return new Promise((resolve, reject) => {
+            captureFrameAsBase64(lane.id, (base64Image) => {
+                fetch("/receive_frame/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+                    body: JSON.stringify({ image: base64Image, lane: lane.name })
+                }).then(res => res.json())
+                  .then(resolve)
+                  .catch(reject);
+            });
+        });
+    }
+
+    setInterval(() => {
+        lanes.forEach((l, i) => {
+            if (i !== currentLaneIndex && waitingTimes[l.name] > 0) {
+                waitingTimes[l.name]--;
+                document.querySelector(`#${l.name.toLowerCase()}-wait`).textContent = waitingTimes[l.name];
+            }
+        });
+    }, 1000);
+
+    async function processLane(laneIndex) {
+        try {
+            const lane = lanes[laneIndex];
+            const data = await sendFrame(lane);
+            timeLeft = data.green_time || 10;
+
+            waitingTimes[lane.name] = 0;
+
+            let tempTime = timeLeft;
+            let nextIndex = (laneIndex + 1) % lanes.length;
+            while (nextIndex !== laneIndex) {
+                waitingTimes[lanes[nextIndex].name] = tempTime;
+                tempTime += timeLeft;
+                nextIndex = (nextIndex + 1) % lanes.length;
+            }
+
+            lanes.forEach((l, i) => {
+                document.querySelector(`#${l.name.toLowerCase()}-count`).textContent =
+                    (i === laneIndex) ? data.vehicle_count : 0;
+                document.querySelector(`#${l.name.toLowerCase()}-time`).textContent =
+                    (i === laneIndex) ? timeLeft : 0;
+                document.querySelector(`#${l.name.toLowerCase()}-wait`).textContent = waitingTimes[l.name];
+                document.querySelector(`#${l.name.toLowerCase()}-signal-light`).className =
+                    "signal-light " + ((i === laneIndex) ? "signal-green" : "signal-red");
+            });
+
+            appendLog(`${lane.name} lane active - Vehicles: ${data.vehicle_count}, Green Time: ${timeLeft}s`);
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(async () => {
+                timeLeft--;
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    currentLaneIndex = (currentLaneIndex + 1) % lanes.length;
+                    await processLane(currentLaneIndex);
+                } else {
+                    document.querySelector(`#${lane.name.toLowerCase()}-time`).textContent = timeLeft;
+                    if (timeLeft === 5) {
+                        const nextIndex = (currentLaneIndex + 1) % lanes.length;
+                        sendFrame(lanes[nextIndex]).catch(()=>{});
+                    }
+                }
+            }, 1000);
+
+        } catch (error) {
+            console.error("Error processing lane:", error);
+            appendLog("Error processing lane: " + error.message);
+        }
+    }
+
+    processLane(currentLaneIndex);
+});
+</script>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-row">
+      <!-- Description -->
+      <div class="col-md-4">
+        <h5 class="mb-1"><i class="fas fa-traffic-light me-2"></i>Smart Traffic Control</h5>
+        <p class="small mb-0">
+          AI-powered traffic monitoring and adaptive signal control for smarter, safer roads.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4">
+        <h6 class="fw-bold mb-1">Quick Links</h6>
+        <ul class="list-unstyled small mb-0 footer-links">
+          <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'live' %}">Live Control</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+        </ul>
+      </div>
+
+      <!-- Follow Us -->
+      <div class="col-md-4">
+        <h6 class="fw-bold mb-1">Follow Us</h6>
+        <p class="small mb-0">Stay connected for updates and features.</p>
+      </div>
+    </div>
+    <hr class="border-light my-3">
+    <div class="text-center small">
+      &copy; 2025 Smart Traffic Control | All Rights Reserved
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
