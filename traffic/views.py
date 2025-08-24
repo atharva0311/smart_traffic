@@ -60,4 +60,4 @@ def about(request):
 
 def home(request):
     """Render your dashboard.html page."""
-    return render(request, 'dashboard.html')
+    return render(request, 'index.html')
